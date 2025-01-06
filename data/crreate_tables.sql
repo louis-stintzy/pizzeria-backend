@@ -6,7 +6,7 @@ CREATE TABLE role (
   id         SERIAL PRIMARY KEY,
   type       VARCHAR(50),                                                  -- Exemples : 'customer', 'employee', 'manager'
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP,
+  updated_at TIMESTAMP
 );
 
 CREATE TABLE app_user (
@@ -18,19 +18,26 @@ CREATE TABLE app_user (
   hash       VARCHAR(255) NOT NULL,
   role_id    INT NOT NULL REFERENCES role(id) ON DELETE RESTRICT,          --  ON DELETE RESTRICT empêche la suppression des données d'une table si d'autres tables les référencent
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP,
+  updated_at TIMESTAMP
 );
 
--- La commande et son mode de retrait
+-- La commande, son mode de retrait et son statut
 
 CREATE TABLE pickup_mode (
   id          SERIAL PRIMARY KEY,
   type        VARCHAR(30) UNIQUE NOT NULL,                                  -- Exemples : 'on site', 'take away', 'delivery'
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
-CREATE TABLE order (
+CREATE TABLE order_status (
+  id          SERIAL PRIMARY KEY,
+  status      VARCHAR(50) UNIQUE NOT NULL,                                  -- Exemples : 'PENDING', 'PAID', 'PREPARING', 'READY', 'DELIVERED', 'CANCELED'
+  created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at  TIMESTAMP
+);
+
+CREATE TABLE customer_order (
   id                    SERIAL PRIMARY KEY,
   ref                   VARCHAR(50),
   applied_coupon_code   VARCHAR(50),                                                -- Code du coupon appliqué
@@ -41,9 +48,9 @@ CREATE TABLE order (
   pickup_mode_id        INT NOT NULL REFERENCES pickup_mode(id) ON DELETE RESTRICT, -- ON DELETE RESTRICT empêche la suppression d'un mode de retrai si des commandes sont associées à ce mode
   customer_id           INT REFERENCES app_user(id) ON DELETE SET NULL,             -- ON DELETE SET NULL définit la valeur de la clé étrangère à NULL si la ligne parent est supprimée. Préserve l'historique des commandes même si l'utilisateur (client) est supprimé.
   waiter_id             INT REFERENCES app_user(id) ON DELETE SET NULL,             -- Préserve l'historique des commandes même si l'utilisateur (employé) est supprimé.
-  status                VARCHAR(20),                                                -- Statut de la commande. Exemple : 'PENDING', 'PAID', 'PREPARING', 'READY', 'DELIVERED', 'CANCELED'
+  status_id             INT REFERENCES order_status(id) ON DELETE SET NULL,         -- Préserve l'historique des commandes même si le statut est supprimé.
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at            TIMESTAMP,
+  updated_at            TIMESTAMP
 );
 
 -- Les adresses : de l'utilisateur et utilisées pour les commandes (adresse de facturation et de livraison)
@@ -57,7 +64,7 @@ CREATE TABLE address (
   type        VARCHAR(20) NOT NULL CHECK (type IN ('BILLING', 'DELIVERY')), -- Typage de l'adresse (facturation ou livraison)
   is_default  BOOLEAN NOT NULL DEFAULT 'false',                             -- Indique si cette adresse est par défaut
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE app_user_has_address (
@@ -67,7 +74,7 @@ CREATE TABLE app_user_has_address (
 );
 
 CREATE TABLE address_for_order (
-  order_id        INT REFERENCES order(id) ON DELETE CASCADE,               -- Supprime la relation si la commande est supprimée
+  order_id        INT REFERENCES customer_order(id) ON DELETE CASCADE,      -- Supprime la relation si la commande est supprimée
   address_id      INT REFERENCES address(id) ON DELETE CASCADE,             -- Supprime la relation si l'adresse est supprimée
   PRIMARY KEY (order_id, address_id)
 );
@@ -87,11 +94,11 @@ CREATE TABLE coupon (
   creator_id       INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id       INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at       TIMESTAMP,
+  updated_at       TIMESTAMP
 );
 
 CREATE TABLE coupon_for_order (
-  order_id    INT REFERENCES order(id) ON DELETE CASCADE,                  -- Supprime la relation si la commande est supprimée
+  order_id    INT REFERENCES customer_order(id) ON DELETE CASCADE,         -- Supprime la relation si la commande est supprimée
   coupon_id   INT REFERENCES coupon(id) ON DELETE RESTRICT,                -- Empêche la suppression de la relation si des commandes sont associées à ce coupon
   PRIMARY KEY (order_id, coupon_id)
 );
@@ -102,7 +109,7 @@ CREATE TABLE payment_method (
   id          SERIAL PRIMARY KEY,
   type        VARCHAR(50) UNIQUE NOT NULL,                                -- Exemples : 'credit card', 'cash', 'check'
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE payment (
@@ -111,11 +118,11 @@ CREATE TABLE payment (
   app_user_id INT REFERENCES app_user(id) ON DELETE SET NULL,             -- ON DELETE SET NULL définit la valeur de la clé étrangère à NULL si la ligne parent est supprimée. Préserve l'historique des paiements même si l'utilisateur est supprimé.
   method_id  INT REFERENCES payment_method(id) ON DELETE RESTRICT,        -- Empêche la suppression du moyen de paiement si des paiements sont associés à ce moyen
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE receive (
-  order_id    INT REFERENCES order(id) ON DELETE CASCADE,                 -- Supprime la relation si la commande est supprimée
+  order_id    INT REFERENCES customer_order(id) ON DELETE CASCADE,        -- Supprime la relation si la commande est supprimée
   payment_id  INT REFERENCES payment(id) ON DELETE CASCADE,               -- Supprime la relation si le paiement est supprimé
   PRIMARY KEY (order_id, payment_id)
 );
@@ -126,7 +133,7 @@ CREATE TABLE picture (
   id          SERIAL PRIMARY KEY,
   url         TEXT,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE topping (
@@ -136,7 +143,7 @@ CREATE TABLE topping (
   creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE pizza (
@@ -146,7 +153,7 @@ CREATE TABLE pizza (
   creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE pizza_has_topping (
@@ -170,7 +177,7 @@ CREATE TABLE size (
   creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE price (
@@ -179,15 +186,19 @@ CREATE TABLE price (
   creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at  TIMESTAMP,
+  updated_at  TIMESTAMP
 );
 
 CREATE TABLE pizza_size_price (
-    pizza_id INT REFERENCES PIZZA(id) ON DELETE CASCADE,
-    size_id INT REFERENCES SIZE(id) ON DELETE CASCADE,
-    price_id INT REFERENCES PRICE(id) ON DELETE CASCADE,
-    price_at_order_time DECIMAL(10, 2) NOT NULL
-    PRIMARY KEY (pizza_id, size_id, price_id)
+    id        SERIAL PRIMARY KEY,
+    pizza_id  INT REFERENCES PIZZA(id) ON DELETE RESTRICT,            -- Empêche la suppression de la pizza si elle est utilisée ici (si des tailles et des prix lui sont associés)
+    size_id   INT REFERENCES SIZE(id) ON DELETE RESTRICT,             -- Empêche la suppression de la taille si elle est utilisée ici (si des pizzas et des prix lui sont associés)
+    price_id  INT REFERENCES PRICE(id) ON DELETE RESTRICT,            -- Empêche la suppression du prix si il est utilisé ici (si des pizzas et des tailles lui sont associées)
+    is_active BOOLEAN NOT NULL DEFAULT 'true',                        -- Flag pour indiquer si la relation est active (ou si elle est obsolète mais conservée pour l'historique)
+    creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
+    updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP
 );
 
 -- Les étiquettes (labels) pour les pizzas
@@ -212,17 +223,17 @@ CREATE TABLE pizza_has_label (
 -- Les commandes et les pizzas commandées
 
 CREATE TABLE contain (
-  order_id INT REFERENCES "order"(id) ON DELETE CASCADE,
-  pizza_id INT REFERENCES pizza(id) ON DELETE CASCADE,
-  quantity INT NOT NULL CHECK (quantity > 0),
-  PRIMARY KEY (order_id, pizza_id)
+  order_id            INT REFERENCES customer_order(id) ON DELETE CASCADE,        -- Supprime la relation si la commande est supprimée
+  pizza_size_price_id INT REFERENCES pizza_size_price(id) ON DELETE RESTRICT,     -- Empêche la suppression de la relation si utilisée dans une commande
+  quantity            INT NOT NULL CHECK (quantity > 0),                          -- Quantité commandée
+  PRIMARY KEY (order_id, pizza_size_price_id)
 );
 
 -- Les commentaires et les notes
 
 CREATE TABLE score (
-  app_user_id   INT REFERENCES app_user(id) ON DELETE CASCADE,
-  pizza_id      INT REFERENCES pizza(id) ON DELETE CASCADE,
+  app_user_id   INT REFERENCES app_user(id) ON DELETE SET NULL,
+  pizza_id      INT REFERENCES pizza(id) ON DELETE SET NULL,
   stars         INT NOT NULL CHECK (stars BETWEEN 1 AND 5),
   comment       TEXT,
   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
