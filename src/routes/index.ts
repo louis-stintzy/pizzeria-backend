@@ -3,6 +3,6 @@ import pizzaRouter from './pizzaRoutes';
 
 const router = Router();
 
-router.use('/pizza', pizzaRouter);
+router.use('/pizzas', pizzaRouter);
 
 export default router;
