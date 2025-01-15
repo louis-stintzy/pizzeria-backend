@@ -1,3 +1,5 @@
+// note : run the command “npx ts-node src/database/testDbConnection.ts” to test the connection to the database
+
 import dotenv from 'dotenv';
 dotenv.config();
 

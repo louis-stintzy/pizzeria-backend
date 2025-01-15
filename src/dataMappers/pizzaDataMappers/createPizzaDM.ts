@@ -6,14 +6,17 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody) => {
 
   return executeTransaction(async (client) => {
     // Check the existence of the creator and its role
-    const creatorQuery =
-      'SELECT app_user.id, app_user.role_id, role.type FROM app_user LEFT JOIN role ON app_user.role_id = role.id WHERE id = $1';
+    const creatorQuery = `
+      SELECT app_user.id AS user_id, app_user.role_id AS user_role_id, role.type AS role_type
+      FROM app_user
+      LEFT JOIN role ON app_user.role_id = role.id
+      WHERE app_user.id = $1`;
     const creatorValues = [creatorId];
     const creatorResult = await client.query(creatorQuery, creatorValues);
     if (creatorResult.rowCount === 0) throw new Error('Creator not found');
     if (creatorResult.rows[0].role_type !== 'manager') throw new Error('Creator is not a manager');
 
-    // Check other entities (toppings, labels, size, price)
+    // Check labels, toppings, size & price
     // todo: mettre en cache toppings, labels, size, price et checker le cache plutôt que la db
     if (labelIds) {
       const labelQuery = 'SELECT id FROM label WHERE id = ANY($1::int[])';
@@ -47,13 +50,13 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody) => {
       newPictureId = insertPictureResult.rows[0].id;
     }
 
-    // Insert the pizza in the database
+    // Insert pizza
     const insertPizzaQuery = 'INSERT INTO pizza (name, description, creator_id) VALUES ($1, $2, $3) RETURNING id';
     const insertPizzaValues = [name, description, creatorId];
     const insertPizzaResult = await client.query(insertPizzaQuery, insertPizzaValues);
     const newPizzaId = insertPizzaResult.rows[0].id;
 
-    // Insert the relations with the pizza
+    // Insert pizza relationships
     if (labelIds) {
       await Promise.all(
         labelIds.map(async (labelId) => {
@@ -72,7 +75,7 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody) => {
       })
     );
 
-    if (pictureUrl) {
+    if (pictureUrl || newPictureId) {
       const insertPizzaPictureQuery = 'INSERT INTO pizza_has_picture (pizza_id, picture_id) VALUES ($1, $2)';
       const insertPizzaPictureValues = [newPizzaId, newPictureId];
       await client.query(insertPizzaPictureQuery, insertPizzaPictureValues);

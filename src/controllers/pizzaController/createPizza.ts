@@ -10,7 +10,7 @@ const createPizza = async (req: Request<{}, {}, CreatePizzaRequestBody>, res: Re
     const parsedBody = validateNewPizza(req.body);
     // Create the pizza
     const newPizza = await createPizzaDM(parsedBody);
-
+    // Send the response
     res.send({ newPizza });
   } catch (error) {
     console.log('error');
