@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { PORT } from './dotenv/config';
 import cors from 'cors';
 import router from './routes';
+import { errorHandler } from './middlewares/errorHandler';
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use('/api', router);
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: `Route ${req.originalUrl} not found` });
 });
+
+// Middleware pour gérer les erreurs
+app.use(errorHandler);
 
 // Lance le serveur
 app.listen(PORT, () => {

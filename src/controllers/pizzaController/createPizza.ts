@@ -11,10 +11,10 @@ const createPizza = async (req: Request<{}, {}, CreatePizzaRequestBody>, res: Re
     // Create the pizza
     const newPizza = await createPizzaDM(parsedBody);
     // Send the response
-    res.send({ newPizza });
+    return res.send({ newPizza });
   } catch (error) {
     console.log('error');
-    res.status(500).send({ message: (error as Error).message });
+    return res.status(500).send({ message: (error as Error).message });
   }
 };
 
