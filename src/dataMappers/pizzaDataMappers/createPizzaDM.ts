@@ -1,7 +1,11 @@
 import { CreatePizzaRequestBody } from '../../@types/pizza';
-import { executeTransaction } from '../../database/db';
+import { executeTransaction } from '../../database/executeTransaction';
 
-export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody) => {
+interface CreatePizzaDMResponse {
+  id: number;
+}
+
+export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise<CreatePizzaDMResponse> => {
   const { creatorId, name, description, labelIds, toppingIds, pictureUrl, sizeId, priceId } = parsedBody;
 
   return executeTransaction(async (client) => {

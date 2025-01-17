@@ -1,22 +1,5 @@
-import { Pool, PoolClient } from 'pg';
-import { DATABASE_URL } from '../dotenv/config';
-
-export const pool = new Pool({
-  connectionString: DATABASE_URL,
-  max: 10,
-  idleTimeoutMillis: 30000,
-});
-
-export const query = async (text: string, params?: any[]) => {
-  try {
-    return await pool.query(text, params);
-  } catch (err) {
-    console.error('Database query Error:', err);
-    // todo: add logger
-    // logger.error(`SQL Error: ${err.message}`, { query: text, params });
-    throw new Error('Database query failed');
-  }
-};
+import { PoolClient } from 'pg';
+import { pool } from './pool';
 
 // Cette fonction permet d'exécuter une transaction en utilisant un client de pool
 // Elle prend en paramètre une fonction callback qui sera appelée à l'intérieur

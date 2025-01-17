@@ -1,20 +1,41 @@
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { validateNewPizza } from '../../utils/validators/newPizzaValidator';
 import { createPizzaDM } from '../../dataMappers/pizzaDataMappers/createPizzaDM';
 import { CreatePizzaRequestBody } from '../../@types/pizza';
 
-const createPizza = async (req: Request<{}, {}, CreatePizzaRequestBody>, res: Response) => {
-  // voir types de Request : Params, ResBody, ReqBody, Query, etc.
+// RequestHandler<
+//   P = ParamsDictionary,  // Paramètres d'URL (req.params)
+//   ResBody = any,         // Type de la réponse qu'on renvoie (res.body)
+//   ReqBody = any,         // Type du body de la requête (req.body)
+//   ReqQuery = ParsedQs    // Type de la query string (req.query)
+// >
+
+// todo : à modifier avec la gestion des erreurs, createPizzaResponse sera dans pizza.d.ts
+type createPizzaResponse = {
+  newPizza:
+    | {
+        id: number;
+        // name: string;
+        // description: string;
+        // price: number;
+      }
+    | { message: string };
+};
+
+const createPizza: RequestHandler<{}, createPizzaResponse, CreatePizzaRequestBody> = async (req, res) => {
   try {
     // Validate the request body
     const parsedBody = validateNewPizza(req.body);
     // Create the pizza
     const newPizza = await createPizzaDM(parsedBody);
     // Send the response
-    return res.send({ newPizza });
+    res.status(201).json({ newPizza });
+    return;
   } catch (error) {
+    // todo : à modifier avec la gestion des erreurs
     console.log('error');
-    return res.status(500).send({ message: (error as Error).message });
+    res.status(500).send({ newPizza: { message: (error as Error).message } });
+    return;
   }
 };
 
