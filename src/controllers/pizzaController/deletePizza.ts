@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/require-await
 const deletePizza = async (req: Request, res: Response) => {
   try {
     res.send('deletePizza');

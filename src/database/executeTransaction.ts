@@ -14,7 +14,7 @@ import { pool } from './pool';
 // si la fonction callback se termine avec une erreur, la transaction est annulée en exécutant la requête ROLLBACK
 // enfin, le client est relâché avec la méthode release()
 
-export const executeTransaction = async (callback: (client: PoolClient) => Promise<any>) => {
+export async function executeTransaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
   // pool.connect() crée une connexion dédiée et retourne un objet PoolClient pour exécuter des requêtes.
   const client = await pool.connect();
   try {
@@ -30,4 +30,21 @@ export const executeTransaction = async (callback: (client: PoolClient) => Promi
   } finally {
     client.release();
   }
-};
+}
+
+// type 'any' est à éviter, on peut utiliser 'unknown' mais ne fonctionnait pas avec createPizzaDM.ts par exemple qui utilise un type précis
+// on peut aussi utiliser un type générique <T> pour la fonction executeTransaction (T est une variable de type)
+// Au moment où on va appeler cette fonction, TypeScript va déterminer la nature de T en fonction des arguments et du contexte.
+
+// Exemple :
+// function identity<T>(value: T): T {
+//  return value;
+// }
+// => T est inféré automatiquement
+//  const num = identity(42); // T est number
+//  const str = identity('Hello'); // T est string
+
+// "return result;" : 'result' est ce que le callback a renvoyé.
+// La fonction executeTransaction renvoie ce que le callback a renvoyé.
+// Puisque le callback renvoie une Promise<T>, le await callback(client) est un T
+// Donc, executeTransaction() renvoie un Promise<T> (asynchrone).

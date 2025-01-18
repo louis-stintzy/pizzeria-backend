@@ -3,7 +3,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { pool } from './db';
+import { pool } from './pool';
 
 const testConnection = async () => {
   try {
@@ -15,4 +15,6 @@ const testConnection = async () => {
   }
 };
 
-testConnection();
+testConnection()
+  .then(() => console.log('Connection tested'))
+  .catch(console.error);

@@ -6,10 +6,10 @@
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly errorCode: string;
-  public readonly details?: any;
+  public readonly details?: unknown;
   public readonly isOperational: boolean;
 
-  constructor(message: string, statusCode: number, errorCode: string, details?: any, isOperational = true) {
+  constructor(message: string, statusCode: number, errorCode: string, details?: unknown, isOperational = true) {
     super(message);
 
     // pour que instanceof fonctionne correctement

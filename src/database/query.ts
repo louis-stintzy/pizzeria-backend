@@ -1,6 +1,6 @@
 import { pool } from './pool';
 
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   try {
     return await pool.query(text, params);
   } catch (err) {

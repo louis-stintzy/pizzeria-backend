@@ -1,4 +1,4 @@
-import { Request, RequestHandler, Response } from 'express';
+import { RequestHandler } from 'express';
 import { validateNewPizza } from '../../utils/validators/newPizzaValidator';
 import { createPizzaDM } from '../../dataMappers/pizzaDataMappers/createPizzaDM';
 import { CreatePizzaRequestBody } from '../../@types/pizza';
@@ -11,7 +11,7 @@ import { CreatePizzaRequestBody } from '../../@types/pizza';
 // >
 
 // todo : à modifier avec la gestion des erreurs, createPizzaResponse sera dans pizza.d.ts
-type createPizzaResponse = {
+interface createPizzaResponse {
   newPizza:
     | {
         id: number;
@@ -20,9 +20,9 @@ type createPizzaResponse = {
         // price: number;
       }
     | { message: string };
-};
+}
 
-const createPizza: RequestHandler<{}, createPizzaResponse, CreatePizzaRequestBody> = async (req, res) => {
+const createPizza: RequestHandler<unknown, createPizzaResponse, CreatePizzaRequestBody> = async (req, res) => {
   try {
     // Validate the request body
     const parsedBody = validateNewPizza(req.body);

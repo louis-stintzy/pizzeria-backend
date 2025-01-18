@@ -5,6 +5,20 @@ interface CreatePizzaDMResponse {
   id: number;
 }
 
+interface CreatorRow {
+  user_id: number;
+  user_role_id: number;
+  role_type: string;
+}
+
+interface InsertPictureRow {
+  id: number;
+}
+
+interface InsertPizzaRow {
+  id: number;
+}
+
 export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise<CreatePizzaDMResponse> => {
   const { creatorId, name, description, labelIds, toppingIds, pictureUrl, sizeId, priceId } = parsedBody;
 
@@ -16,7 +30,7 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
       LEFT JOIN role ON app_user.role_id = role.id
       WHERE app_user.id = $1`;
     const creatorValues = [creatorId];
-    const creatorResult = await client.query(creatorQuery, creatorValues);
+    const creatorResult = await client.query<CreatorRow>(creatorQuery, creatorValues);
     if (creatorResult.rowCount === 0) throw new Error('Creator not found');
     if (creatorResult.rows[0].role_type !== 'manager') throw new Error('Creator is not a manager');
 
@@ -50,14 +64,14 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
     if (pictureUrl) {
       const insertPictureQuery = 'INSERT INTO picture VALUES ($1) RETURNING id';
       const insertPictureValues = [pictureUrl];
-      const insertPictureResult = await client.query(insertPictureQuery, insertPictureValues);
+      const insertPictureResult = await client.query<InsertPictureRow>(insertPictureQuery, insertPictureValues);
       newPictureId = insertPictureResult.rows[0].id;
     }
 
     // Insert pizza
     const insertPizzaQuery = 'INSERT INTO pizza (name, description, creator_id) VALUES ($1, $2, $3) RETURNING id';
     const insertPizzaValues = [name, description, creatorId];
-    const insertPizzaResult = await client.query(insertPizzaQuery, insertPizzaValues);
+    const insertPizzaResult = await client.query<InsertPizzaRow>(insertPizzaQuery, insertPizzaValues);
     const newPizzaId = insertPizzaResult.rows[0].id;
 
     // Insert pizza relationships
