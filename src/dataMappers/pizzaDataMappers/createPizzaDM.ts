@@ -1,10 +1,8 @@
 import { NotFoundError, ForbiddenError } from '../../errors';
-import { CreatePizzaRequestBody } from '../../@types/pizza';
+import { CreatePizzaRequestBody, CreatePizzaDMResponse } from '../../@types/pizza';
 import { executeTransaction } from '../../database/executeTransaction';
 
-interface CreatePizzaDMResponse {
-  id: number;
-}
+// todo : à déplacer dans @types (à voir où avec les autres requêtes dans les autres dataMappers)
 
 interface CreatorRow {
   user_id: number;

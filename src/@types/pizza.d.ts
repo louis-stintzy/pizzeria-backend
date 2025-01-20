@@ -8,3 +8,15 @@ export interface CreatePizzaRequestBody {
   sizeId: number;
   priceId: number;
 }
+
+export interface CreatePizzaDMResponse {
+  id: number;
+}
+export interface CreatePizzaResponseBody {
+  newPizza: {
+    id: number;
+    // name: string;
+    // description: string;
+    // price: number;
+  };
+}

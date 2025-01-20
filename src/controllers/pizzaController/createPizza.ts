@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { validateNewPizza } from '../../utils/validators/newPizzaValidator';
 import { createPizzaDM } from '../../dataMappers/pizzaDataMappers/createPizzaDM';
-import { CreatePizzaRequestBody } from '../../@types/pizza';
+import { CreatePizzaRequestBody, CreatePizzaResponseBody } from '../../@types/pizza';
 
 // RequestHandler<
 //   P = ParamsDictionary,  // Paramètres d'URL (req.params)
@@ -10,19 +10,11 @@ import { CreatePizzaRequestBody } from '../../@types/pizza';
 //   ReqQuery = ParsedQs    // Type de la query string (req.query)
 // >
 
-// todo : à modifier createPizzaResponse sera dans pizza.d.ts
-interface createPizzaResponse {
-  newPizza:
-    | {
-        id: number;
-        // name: string;
-        // description: string;
-        // price: number;
-      }
-    | { message: string };
-}
-
-const createPizza: RequestHandler<unknown, createPizzaResponse, CreatePizzaRequestBody> = async (req, res, next) => {
+const createPizza: RequestHandler<unknown, CreatePizzaResponseBody, CreatePizzaRequestBody> = async (
+  req,
+  res,
+  next
+) => {
   try {
     // Validate the request body
     const parsedBody = validateNewPizza(req.body);
