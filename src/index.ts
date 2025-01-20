@@ -33,7 +33,7 @@ app.use('/api', router);
 
 // Routes non définie
 app.use((req: Request, _res: Response) => {
-  throw new NotFoundError('Route not found', `Route ${req.originalUrl} not found`);
+  throw new NotFoundError({ publicMessage: 'Route not found', internalMessage: `Route ${req.originalUrl} not found` });
 });
 
 // Middleware pour gérer les erreurs

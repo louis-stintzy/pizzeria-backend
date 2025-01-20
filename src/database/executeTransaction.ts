@@ -27,7 +27,12 @@ export async function executeTransaction<T>(callback: (client: PoolClient) => Pr
   } catch (err) {
     await client.query('ROLLBACK');
     if (err instanceof AppError) throw err; // Si l'erreur est une instance de AppError, on la throw
-    throw new DataBaseError('Database transaction error', err); // Sinon, on crée une nouvelle instance de DataBaseError
+    throw new DataBaseError({
+      // Sinon, on crée une nouvelle instance de DataBaseError
+      publicMessage: 'Database error',
+      internalMessage: 'Database transaction error',
+      details: err,
+    });
   } finally {
     client.release();
   }

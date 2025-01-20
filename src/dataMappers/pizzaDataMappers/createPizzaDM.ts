@@ -32,9 +32,14 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
       WHERE app_user.id = $1`;
     const creatorValues = [creatorId];
     const creatorResult = await client.query<CreatorRow>(creatorQuery, creatorValues);
-    if (creatorResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Creator not found');
+    if (creatorResult.rowCount === 0)
+      throw new NotFoundError({ publicMessage: 'Ressource not found', internalMessage: 'Creator not found' });
     if (creatorResult.rows[0].role_type !== 'manager')
-      throw new ForbiddenError('Pizza creation is forbidden for this user', 'Creator is not a manager');
+      throw new ForbiddenError({
+        publicMessage: 'Pizza creation is forbidden for this user',
+        internalMessage: 'Creator is not a manager',
+        details: `creatorResult.rows[0] : ${JSON.stringify(creatorResult.rows[0])}`,
+      });
 
     // Check labels, toppings, size & price
     // todo: mettre en cache toppings, labels, size, price et checker le cache plutôt que la db
@@ -43,24 +48,40 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
       const labelValues = [labelIds];
       const labelResult = await client.query(labelQuery, labelValues);
       if (labelResult.rowCount !== labelIds.length)
-        throw new NotFoundError('Ressource not found', 'Some labels not found');
+        throw new NotFoundError({
+          publicMessage: 'Ressource not found',
+          internalMessage: 'Some labels not found',
+          details: {
+            wanted: `labelIds : ${JSON.stringify(labelIds)}`,
+            found: `labelResult.rows : ${JSON.stringify(labelResult.rows)}`,
+          },
+        });
     }
 
     const toppingQuery = 'SELECT id FROM topping WHERE id = ANY($1::int[])';
     const toppingValues = [toppingIds];
     const toppingResult = await client.query(toppingQuery, toppingValues);
     if (toppingResult.rowCount !== toppingIds.length)
-      throw new NotFoundError('Ressource not found', 'Some toppings not found');
+      throw new NotFoundError({
+        publicMessage: 'Ressource not found',
+        internalMessage: 'Some toppings not found',
+        details: {
+          wanted: `toppingIds : ${JSON.stringify(toppingIds)}`,
+          found: `toppingResult.rows : ${JSON.stringify(toppingResult.rows)}`,
+        },
+      });
 
     const sizeQuery = 'SELECT id FROM size WHERE id = $1';
     const sizeValues = [sizeId];
     const sizeResult = await client.query(sizeQuery, sizeValues);
-    if (sizeResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Size not found');
+    if (sizeResult.rowCount === 0)
+      throw new NotFoundError({ publicMessage: 'Ressource not found', internalMessage: 'Size not found' });
 
     const priceQuery = 'SELECT id FROM price WHERE id = $1';
     const priceValues = [priceId];
     const priceResult = await client.query(priceQuery, priceValues);
-    if (priceResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Price not found');
+    if (priceResult.rowCount === 0)
+      throw new NotFoundError({ publicMessage: 'Ressource not found', internalMessage: 'Price not found' });
 
     // Insert image in the database
     // todo: on gère le cas pour une seule image -> gérer le cas pour plusieurs images

@@ -18,6 +18,10 @@ export const validateNewPizza = (data: unknown) => {
   try {
     return newPizzaSchema.parse(data);
   } catch (err) {
-    throw new ValidationError('Invalid new pizza data', err);
+    throw new ValidationError({
+      publicMessage: 'Invalid new pizza data',
+      internalMessage: 'Invalid new pizza data',
+      details: err,
+    });
   }
 };
