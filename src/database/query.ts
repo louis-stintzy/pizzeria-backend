@@ -1,12 +1,11 @@
+import { AppError, DataBaseError } from '../errors';
 import { pool } from './pool';
 
 export const query = async (text: string, params?: unknown[]) => {
   try {
     return await pool.query(text, params);
   } catch (err) {
-    console.error('Database query Error:', err);
-    // todo: add logger
-    // logger.error(`SQL Error: ${err.message}`, { query: text, params });
-    throw new Error('Database query failed');
+    if (err instanceof AppError) throw err; // Si l'erreur est une instance de AppError, on la throw
+    throw new DataBaseError('Database query error', err); // Sinon, on crée une nouvelle instance de DataBaseError
   }
 };

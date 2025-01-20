@@ -5,6 +5,7 @@ import { AppError } from '../errors/AppError';
 // c'est pourquoi on ne fait pas return res.status().json() mais res.status().json() + return vide (ou pas de return)
 
 export const errorHandler: ErrorRequestHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  // Log the error with details ; // Send a response to the client (withouth details)
   if (err instanceof AppError) {
     console.error(`[${err.errorCode}] - ${err.message}`, { stack: err.stack, details: err.details });
     res.status(err.statusCode).json({ errorCode: err.errorCode, message: err.message, details: err.details ?? null });

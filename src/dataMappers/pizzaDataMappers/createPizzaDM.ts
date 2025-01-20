@@ -1,3 +1,4 @@
+import { NotFoundError, ForbiddenError } from '../../errors';
 import { CreatePizzaRequestBody } from '../../@types/pizza';
 import { executeTransaction } from '../../database/executeTransaction';
 
@@ -31,8 +32,9 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
       WHERE app_user.id = $1`;
     const creatorValues = [creatorId];
     const creatorResult = await client.query<CreatorRow>(creatorQuery, creatorValues);
-    if (creatorResult.rowCount === 0) throw new Error('Creator not found');
-    if (creatorResult.rows[0].role_type !== 'manager') throw new Error('Creator is not a manager');
+    if (creatorResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Creator not found');
+    if (creatorResult.rows[0].role_type !== 'manager')
+      throw new ForbiddenError('Pizza creation is forbidden for this user', 'Creator is not a manager');
 
     // Check labels, toppings, size & price
     // todo: mettre en cache toppings, labels, size, price et checker le cache plutôt que la db
@@ -40,23 +42,25 @@ export const createPizzaDM = async (parsedBody: CreatePizzaRequestBody): Promise
       const labelQuery = 'SELECT id FROM label WHERE id = ANY($1::int[])';
       const labelValues = [labelIds];
       const labelResult = await client.query(labelQuery, labelValues);
-      if (labelResult.rowCount !== labelIds.length) throw new Error('Some labels not found');
+      if (labelResult.rowCount !== labelIds.length)
+        throw new NotFoundError('Ressource not found', 'Some labels not found');
     }
 
     const toppingQuery = 'SELECT id FROM topping WHERE id = ANY($1::int[])';
     const toppingValues = [toppingIds];
     const toppingResult = await client.query(toppingQuery, toppingValues);
-    if (toppingResult.rowCount !== toppingIds.length) throw new Error('Some toppings not found');
+    if (toppingResult.rowCount !== toppingIds.length)
+      throw new NotFoundError('Ressource not found', 'Some toppings not found');
 
     const sizeQuery = 'SELECT id FROM size WHERE id = $1';
     const sizeValues = [sizeId];
     const sizeResult = await client.query(sizeQuery, sizeValues);
-    if (sizeResult.rowCount === 0) throw new Error('Size not found');
+    if (sizeResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Size not found');
 
     const priceQuery = 'SELECT id FROM price WHERE id = $1';
     const priceValues = [priceId];
     const priceResult = await client.query(priceQuery, priceValues);
-    if (priceResult.rowCount === 0) throw new Error('Price not found');
+    if (priceResult.rowCount === 0) throw new NotFoundError('Ressource not found', 'Price not found');
 
     // Insert image in the database
     // todo: on gère le cas pour une seule image -> gérer le cas pour plusieurs images

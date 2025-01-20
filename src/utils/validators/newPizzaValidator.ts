@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ValidationError } from '../../errors';
 
 // Define the schema for the new pizza
 const newPizzaSchema = z.object({
@@ -16,7 +17,7 @@ const newPizzaSchema = z.object({
 export const validateNewPizza = (data: unknown) => {
   try {
     return newPizzaSchema.parse(data);
-  } catch (error) {
-    throw new Error((error as Error).message);
+  } catch (err) {
+    throw new ValidationError('Invalid new pizza data', err);
   }
 };

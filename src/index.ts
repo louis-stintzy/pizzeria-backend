@@ -3,6 +3,9 @@ import { PORT } from './dotenv/config';
 import cors from 'cors';
 import router from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import { NotFoundError } from './errors';
+
+// todo : scinder en plusieurs fichiers : index.ts & app.ts
 
 const app = express();
 
@@ -29,8 +32,8 @@ app.get('/', (_: Request, res: Response) => {
 app.use('/api', router);
 
 // Routes non définie
-app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: `Route ${req.originalUrl} not found` });
+app.use((req: Request, _res: Response) => {
+  throw new NotFoundError('Route not found', `Route ${req.originalUrl} not found`);
 });
 
 // Middleware pour gérer les erreurs

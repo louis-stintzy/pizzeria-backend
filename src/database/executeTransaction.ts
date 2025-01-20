@@ -1,5 +1,6 @@
 import { PoolClient } from 'pg';
 import { pool } from './pool';
+import { AppError, DataBaseError } from '../errors';
 
 // Cette fonction permet d'exécuter une transaction en utilisant un client de pool
 // Elle prend en paramètre une fonction callback qui sera appelée à l'intérieur
@@ -25,8 +26,8 @@ export async function executeTransaction<T>(callback: (client: PoolClient) => Pr
     return result;
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Database transaction Error:', err);
-    throw new Error('Database transaction failed');
+    if (err instanceof AppError) throw err; // Si l'erreur est une instance de AppError, on la throw
+    throw new DataBaseError('Database transaction error', err); // Sinon, on crée une nouvelle instance de DataBaseError
   } finally {
     client.release();
   }
