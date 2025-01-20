@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { AppError } from '../errors/AppError';
+import logger from '../logger/logger';
 
 // ErrorRequestHandler en Typescript attend une fonction qui prend 4 arguments et retourne void
 // c'est pourquoi on ne fait pas return res.status().json() mais res.status().json() + return vide (ou pas de return)
@@ -7,7 +8,9 @@ import { AppError } from '../errors/AppError';
 export const errorHandler: ErrorRequestHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof AppError) {
     // Log the error with details (err.message = payload.internalMessage cf AppError)
-    console.error(`[${err.errorCode}] - ${err.message}`, { stack: err.stack, payload: err.payload });
+    // console.error(`[${err.errorCode}] - ${err.message}`, { stack: err.stack, payload: err.payload });
+    // logger.error(`[${err.errorCode}] - ${err.message}`, { stack: err.stack, payload: err.payload });
+    logger.error(`${err.errorCode} : ${err.message}`, { payload: err.payload, stack: err.stack });
     // Send a response to the client (withouth details, with publicMessage)
     res.status(err.statusCode).json({ errorCode: err.errorCode, message: err.payload.publicMessage });
     return;
