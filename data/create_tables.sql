@@ -4,7 +4,7 @@ BEGIN;
 
 CREATE TABLE role (
   id         SERIAL PRIMARY KEY,
-  type       VARCHAR(50),                                                  -- Exemples : 'customer', 'employee', 'manager'
+  type       VARCHAR(50) NOT NULL,                                                  -- Exemples : 'customer', 'employee', 'manager'
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP
 );
@@ -150,6 +150,7 @@ CREATE TABLE pizza (
   id          SERIAL PRIMARY KEY,
   name        VARCHAR(100) UNIQUE NOT NULL,
   description VARCHAR(255),
+  position    INT NOT NULL DEFAULT 0,                                     -- Position de la pizza dans la liste des pizzas
   creator_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   updater_id  INT REFERENCES app_user (id) ON DELETE SET NULL,
   created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

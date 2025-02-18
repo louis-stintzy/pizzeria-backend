@@ -1,7 +1,9 @@
+// note : run the command “npx ts-node src/database/testDbConnection.ts” to test the connection to the database
+
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { pool } from './db';
+import { pool } from './pool';
 
 const testConnection = async () => {
   try {
@@ -13,4 +15,6 @@ const testConnection = async () => {
   }
 };
 
-testConnection();
+testConnection()
+  .then(() => console.log('Connection tested'))
+  .catch(console.error);

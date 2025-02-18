@@ -1,14 +1,8 @@
-import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
-dotenv.config();
+import { PORT } from './dotenv/config';
 
-const app = express();
-const port = process.env.PORT || 3000;
+import app from './app';
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to the Pizzeria Backend !');
-});
-
-app.listen(port, () => {
-  console.log(`Server listening on ${port}`);
+// Lance le serveur
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
 });
