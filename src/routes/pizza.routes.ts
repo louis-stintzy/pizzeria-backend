@@ -6,7 +6,7 @@ import {
   replacePizza,
   modifyPizza,
   deletePizza,
-} from '../controllers/pizzaController';
+} from '../controllers/pizza.controller';
 
 const router = Router();
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import pizzaRouter from './pizzaRoutes';
+import pizzaRouter from './pizza.routes';
 
 const router = Router();
 

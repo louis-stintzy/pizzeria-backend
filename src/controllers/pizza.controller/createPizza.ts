@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { validateNewPizza } from '../../utils/validators/newPizzaValidator';
-import { createPizzaDM } from '../../dataMappers/pizzaDataMappers/createPizzaDM';
+import { createPizzaDM } from '../../repositories/pizza.repository/createPizzaDM';
 import { CreatePizzaRequestBody, CreatePizzaResponseBody } from '../../@types/pizza';
 
 // RequestHandler<
