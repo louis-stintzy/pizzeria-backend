@@ -1,4 +1,5 @@
 import { addColors, createLogger, format, transports } from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 // Niveaux de logs personnalisés
 const customLevels = {
@@ -44,7 +45,19 @@ const logger = createLogger({
       return `${lvl} ${time}${msg}  \n${pld}\n${stck} \n${end}`; // default
     })
   ),
-  transports: [new transports.Console()],
+  transports: [
+    new transports.Console(),
+
+    new DailyRotateFile({
+      dirname: 'logs',
+      filename: 'app-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      level: 'http',
+      zippedArchive: true,
+      maxSize: '20m',
+      maxFiles: '7d',
+    }),
+  ],
 });
 
 export default logger;
