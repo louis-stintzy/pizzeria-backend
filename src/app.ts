@@ -3,6 +3,7 @@ import cors from 'cors';
 import router from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { NotFoundError } from './errors';
+import { morganMiddleware } from './middlewares/morganMiddleware';
 
 const app = express();
 
@@ -19,6 +20,9 @@ app.use(express.json());
 
 // Permettre l'utilisation de la methode POST
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware pour logger les requêtes
+app.use(morganMiddleware);
 
 // Route '/', route de bienvenue
 app.get('/', (_: Request, res: Response) => {
